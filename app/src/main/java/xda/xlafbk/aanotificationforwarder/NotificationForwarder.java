@@ -174,6 +174,13 @@ public class NotificationForwarder extends NotificationListenerService {
 
         // Get the best notification icon (large, small, default) and return it as bitmap
         Bitmap notificationIcon = NotificationHelper.getNotificationIconBitmap(context, notification);
+        // Skip messaging notifications — Android Auto handles these natively.
+        // Forwarding them would cause duplicate notifications.
+        if (NotificationHelper.isMessagingNotification(notification)) {
+            logger.log("Skipping messaging notification (handled natively by Android Auto)");
+            return;
+        }
+
         logger.log("Forwarding notification");
 
         NotificationHelper.sendCarNotification(context, title, text, null, notificationIcon, new Random().nextInt(100000));

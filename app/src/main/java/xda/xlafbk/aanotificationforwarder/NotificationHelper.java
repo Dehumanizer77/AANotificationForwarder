@@ -13,6 +13,7 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -22,6 +23,33 @@ import androidx.core.app.RemoteInput;
 import androidx.preference.PreferenceManager;
 
 public class NotificationHelper {
+
+    /**
+     * Detects messaging notifications that Android Auto handles natively.
+     * Forwarding these would cause duplicate notifications.
+     */
+    public static boolean isMessagingNotification(Notification notification) {
+        // Check standard messaging category
+        if (Notification.CATEGORY_MESSAGE.equals(notification.category)) {
+            return true;
+        }
+
+        Bundle extras = notification.extras;
+        if (extras != null) {
+            // Check for MessagingStyle
+            if (extras.containsKey("android.messagingStyleUser")) {
+                return true;
+            }
+
+            // Check for CarExtender conversation
+            Bundle carExtensions = extras.getBundle("android.car.EXTENSIONS");
+            if (carExtensions != null && carExtensions.containsKey("car_conversation")) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     @SuppressLint("MissingPermission")
     public static void sendCarNotification(Context context, String title, String message, @Nullable String groupTitle, Bitmap largeIcon, int conversationId) {
