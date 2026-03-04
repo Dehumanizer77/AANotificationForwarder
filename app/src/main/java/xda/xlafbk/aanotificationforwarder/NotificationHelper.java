@@ -26,29 +26,30 @@ public class NotificationHelper {
 
     /**
      * Detects messaging notifications that Android Auto handles natively.
-     * Forwarding these would cause duplicate notifications.
+     * Android Auto only displays a notification on its own when it has BOTH
+     * MessagingStyle AND a reply action with RemoteInput. Checking only
+     * CATEGORY_MESSAGE is too broad — many apps set that category without
+     * providing the full messaging support AA requires.
      */
     public static boolean isMessagingNotification(Notification notification) {
-        // Check standard messaging category
-        if (Notification.CATEGORY_MESSAGE.equals(notification.category)) {
-            return true;
-        }
+        boolean hasMessagingStyle = false;
+        boolean hasReplyAction = false;
 
         Bundle extras = notification.extras;
         if (extras != null) {
-            // Check for MessagingStyle
-            if (extras.containsKey("android.messagingStyleUser")) {
-                return true;
-            }
+            hasMessagingStyle = extras.containsKey("android.messagingStyleUser");
+        }
 
-            // Check for CarExtender conversation
-            Bundle carExtensions = extras.getBundle("android.car.EXTENSIONS");
-            if (carExtensions != null && carExtensions.containsKey("car_conversation")) {
-                return true;
+        if (notification.actions != null) {
+            for (Notification.Action action : notification.actions) {
+                if (action.getRemoteInputs() != null && action.getRemoteInputs().length > 0) {
+                    hasReplyAction = true;
+                    break;
+                }
             }
         }
 
-        return false;
+        return hasMessagingStyle && hasReplyAction;
     }
 
     @SuppressLint("MissingPermission")
