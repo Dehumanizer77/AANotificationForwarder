@@ -64,7 +64,7 @@ public class AutoConnectionDetector {
     }
 
     public void registerCarConnectionReceiver() {
-        ContextCompat.registerReceiver(context, carConnectionReceiver, new IntentFilter(ACTION_CAR_CONNECTION_UPDATED), ContextCompat.RECEIVER_NOT_EXPORTED);
+        ContextCompat.registerReceiver(context, carConnectionReceiver, new IntentFilter(ACTION_CAR_CONNECTION_UPDATED), ContextCompat.RECEIVER_EXPORTED);
         queryForState();
         Log.i(TAG, "registerCarConnectionReceiver: ");
     }
